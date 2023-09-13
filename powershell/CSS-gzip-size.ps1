@@ -1,4 +1,8 @@
-$in = "D:\Perso\Informatique\web - frontend\CSS frameworks"
+###
+# Size comparison of files before and after gzip
+###
+
+$in = "c:\Users\user\Documents\"
 $out = "$($in)\gziped"
 
 Remove-Item "$($in)\gziped" -Recurse
