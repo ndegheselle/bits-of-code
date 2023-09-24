@@ -6,30 +6,25 @@ using System.Threading.Tasks;
 using System.Transactions;
 using System.Windows.Controls;
 
-namespace MeNoisySoundboard.App.Base
+namespace AppNamespace.Base
 {
-    public interface IWork : IWork<object, object, object>
-    {}
-    public interface IWork<TContext> : IWork<TContext, object, object>
-    { }
-    public interface IWork<TContext, TResult, TParams>
+    public interface IWork
     {
-        public TContext? Context { get; set; }
-        public Task<TResult> Do(TParams? parameters = default);
+        public Task<object> Do(object? parameters = default);
     }
 
-    public class WorkUi<TContext, TResult, TParams> : UserControl, IWork<TContext, TResult, TParams>
+    public class WorkUi<TContext, TParams, TResult> : UserControl, IWork
     {
         public TaskCompletionSource<TResult> TaskCompletion { get; set; } = new TaskCompletionSource<TResult>();
 
         public TContext? Context { get; set; } = default;
-        protected TParams? Parameters{ get; set; } = default;
+        public TParams? Parameters{ get; set; } = default;
 
         // May be good to add a OnStart event (for exempel to refresh the UI)
-        public virtual Task<TResult> Do(TParams? parameters = default)
+        public virtual async Task<object> Do(object? parameters = default)
         {
-            Parameters = parameters;
-            return TaskCompletion.Task;
+            Parameters = (TParams)parameters;
+            return await TaskCompletion.Task;
         }
 
         public void Cancel()
@@ -38,19 +33,16 @@ namespace MeNoisySoundboard.App.Base
         }
     }
 
-    public class SimpleWorkUi<TContext> : WorkUi<TContext, bool, object>
-    {}
-
-    public class Workflow<TContext, TResult, TParams> : IWork<TContext, TResult, TParams>
+    public class Workflow<TContext, TParams, TResult> : IWork
     {
+        // May not need to pass context there since the delegate will have access to the workflow data anyway
         public delegate IWork CreateWork(TContext workflowContext);
         public TContext? Context { get; set; } = default;
 
         protected Dictionary<Type, CreateWork> SubWorks { get; set; } = new Dictionary<Type, CreateWork>();
 
-        public virtual async Task<TResult> Do(TParams? workflowParameters = default)
+        public virtual async Task<object> Do(object? workflowParameters = default)
         {
-
             int currentIndex = 0;
             object? chainParameters = null;
             while(currentIndex >= 0 && currentIndex < SubWorks.Count)
@@ -72,15 +64,6 @@ namespace MeNoisySoundboard.App.Base
             if (currentIndex < 0) throw new TaskCanceledException();
 
             return default(TResult);
-        }
-    }
-
-    public class SimpleWorkflow<TContext> : Workflow<TContext, bool, object>
-    {
-        public override async Task<bool> Do(object? workflowParameters = null)
-        {
-            await base.Do(workflowParameters);
-            return true;
         }
     }
 }
