@@ -1,3 +1,7 @@
+# What is it
+
+![Preview](preview.gif)
+
 This small workflow system can cover most of the needs with work/task/steps in an app :
 - Global context between pages
 - Pass data between pages with parameters and return value
@@ -9,7 +13,12 @@ It make it easy to extend it with :
 - Logging system
 - Separation of concern, if you want to have everything perfectly separated you can have UI work call independante backend work
 
-What could be improve :
+# Could be improved
+
 - Template that handle no return values / no parameters (doubt that possible without reflection) ?
 - Maybe UI work should be only an wrapping of an existing work (for better separation of concern)
 - Use another name than 'work' for the whole thing (too bad Task is already taken)
+
+# Linked
+
+The user controls are based on [Adonis UI](https://benruehl.github.io/adonis-ui/) for the styling.

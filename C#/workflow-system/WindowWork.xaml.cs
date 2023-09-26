@@ -36,10 +36,15 @@ namespace AppNamespace
         public WindowWork()
         {
             InitializeComponent();
-            Loaded += WindowWork_Loaded;
+            var startButton = new Button();
+            startButton.Content = "Start";
+            startButton.VerticalAlignment = VerticalAlignment.Center;
+            startButton.HorizontalAlignment = HorizontalAlignment.Center;
+            startButton.Click += Button_Click;
+            ContentContainer.Content = startButton;
         }
 
-        private async void WindowWork_Loaded(object sender, RoutedEventArgs e)
+        private async void Button_Click(object sender, RoutedEventArgs e)
         {
             var workflow = new WorkflowTest(this);
             await workflow.Do();
