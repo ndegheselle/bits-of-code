@@ -18,6 +18,7 @@ It make it easy to extend it with :
 - Template that handle no return values / no parameters (doubt that possible without reflection) ?
 - Maybe UI work should be only an wrapping of an existing work (for better separation of concern)
 - Use another name than 'work' for the whole thing (too bad Task is already taken)
+- Cancel workflow = cancel current task
 
 # Linked
 
