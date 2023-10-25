@@ -18,7 +18,10 @@ It make it easy to extend it with :
 - Template that handle no return values / no parameters (doubt that possible without reflection) ?
 - Maybe UI work should be only an wrapping of an existing work (for better separation of concern)
 - Use another name than 'work' for the whole thing (too bad Task is already taken)
+
 - Cancel workflow = cancel current task
+- Workflow return the state of the task instead of it's own
+- Separate navigation from show (to have a container without a window for exemple)
 
 # Linked
 
