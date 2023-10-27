@@ -10,17 +10,32 @@ using System.Windows.Controls;
 
 namespace BitsOfCode.WorkflowSystem.Base
 {
+    // Linear workflow
+    // Chain workflow
+
+    // Access to previous work (for exemple if it have context)
+
     public interface IWork
     {
-        public IWork? PreviousWork { get; set; }
         public Task Do(CancellationToken? cancellationToken = null);
-        public IWork? GetNext();
     }
 
-    public class Workflow<TContext> : IWork
+    public interface IChainedWork : IWork
     {
-        public IWork? PreviousWork { get; set; }
-        public IWork? ActualWork { get; set; }
+        public IChainedWork? PreviousWork { get; set; }
+        public IChainedWork? NextWork { get; }
+    }
+
+    public class Workflow<TContext> : IChainedWork
+    {
+        public IChainedWork? PreviousWork { get; set; }
+        public IChainedWork? ActualWork { get; protected set; }
+        public IChainedWork? NextWork { get; protected set; }
+
+        public Workflow(IChainedWork work)
+        {
+            ActualWork = work;
+        }
 
         public async Task Do(CancellationToken? cancellationToken = null)
         {
@@ -29,13 +44,8 @@ namespace BitsOfCode.WorkflowSystem.Base
                 ActualWork.PreviousWork = PreviousWork;
                 await ActualWork.Do(cancellationToken);
                 PreviousWork = ActualWork;
-                ActualWork = ActualWork.GetNext();
+                ActualWork = ActualWork.NextWork;
             }
-        }
-
-        public virtual IWork? GetNext()
-        {
-            return null;
         }
     }
 }
