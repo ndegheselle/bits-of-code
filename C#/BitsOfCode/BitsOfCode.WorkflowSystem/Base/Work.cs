@@ -48,4 +48,17 @@ namespace BitsOfCode.WorkflowSystem.Base
             }
         }
     }
+
+    public interface IWorkflowNode
+    {
+        public Type GetWorkType();
+        public Func<IWork> Create { get; set; }
+    }
+
+    public class WorkflowNode
+    {
+        public IWork? NextWork { get; set; }
+
+    }
+
 }
