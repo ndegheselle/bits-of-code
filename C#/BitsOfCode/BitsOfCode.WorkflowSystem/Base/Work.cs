@@ -1,3 +1,4 @@
+using BitsOfCode.WorkflowSystem.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using System.Windows;
 using System.Windows.Controls;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BitsOfCode.WorkflowSystem.Base
 {
@@ -46,6 +48,30 @@ namespace BitsOfCode.WorkflowSystem.Base
                 PreviousWork = ActualWork;
                 ActualWork = ActualWork.NextWork;
             }
+
+            new WorkflowNode()
+            {
+                Create = () => new WorkA(null),
+                Next = () =>
+                {
+                    if (true)
+                        return new WorkflowNode()
+                        {
+                            Create = () => new WorkB(null),
+                            Next = () => new WorkflowNode()
+                            {
+                            }
+                        };
+                    else
+                        return new WorkflowNode()
+                        {
+                            Create = () => new WorkC(null),
+                            Next = () => new WorkflowNode()
+                            {
+                            }
+                        };
+                }
+            };
         }
     }
 
@@ -57,8 +83,13 @@ namespace BitsOfCode.WorkflowSystem.Base
 
     public class WorkflowNode
     {
-        public IWork? NextWork { get; set; }
+        public Func<IWork> Create { get; set; }
+        public Func<WorkflowNode> Next { get; set; }
 
+        public WorkflowNode Then(Func<WorkflowNode> next)
+        {
+            Next = next;
+            return this;
+        }
     }
-
 }
