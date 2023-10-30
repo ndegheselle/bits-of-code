@@ -22,17 +22,26 @@ namespace BitsOfCode.WorkflowSystem.Base
         public Task Do(CancellationToken? cancellationToken = null);
     }
 
-    public interface IChainedWork : IWork
+    // Don't use an interface
+    public interface INode
     {
-        public IChainedWork? PreviousWork { get; set; }
-        public IChainedWork? NextWork { get; }
+        public INode? Previous { get; set; }
+        public Lazy<IWork> Create { get; }
+        public INode? Next { get; }
+
+        public INode Then(INode node)
+        {
+            node.Previous = this;
+            return node;
+        }
     }
 
-    public class Workflow<TContext> : IChainedWork
+    // Should probably give up on having Work and Node in the same object (or find a way to make it Lazy )
+    public class Workflow<TContext> : IWork, INode
     {
-        public IChainedWork? PreviousWork { get; set; }
-        public IChainedWork? ActualWork { get; protected set; }
-        public IChainedWork? NextWork { get; protected set; }
+        public INode? Previous { get; set; }
+        public Func<IWork> Create => () => this;
+        public INode? Next => throw new NotImplementedException();
 
         public Workflow(IChainedWork work)
         {
@@ -48,48 +57,6 @@ namespace BitsOfCode.WorkflowSystem.Base
                 PreviousWork = ActualWork;
                 ActualWork = ActualWork.NextWork;
             }
-
-            new WorkflowNode()
-            {
-                Create = () => new WorkA(null),
-                Next = () =>
-                {
-                    if (true)
-                        return new WorkflowNode()
-                        {
-                            Create = () => new WorkB(null),
-                            Next = () => new WorkflowNode()
-                            {
-                            }
-                        };
-                    else
-                        return new WorkflowNode()
-                        {
-                            Create = () => new WorkC(null),
-                            Next = () => new WorkflowNode()
-                            {
-                            }
-                        };
-                }
-            };
-        }
-    }
-
-    public interface IWorkflowNode
-    {
-        public Type GetWorkType();
-        public Func<IWork> Create { get; set; }
-    }
-
-    public class WorkflowNode
-    {
-        public Func<IWork> Create { get; set; }
-        public Func<WorkflowNode> Next { get; set; }
-
-        public WorkflowNode Then(Func<WorkflowNode> next)
-        {
-            Next = next;
-            return this;
         }
     }
 }
