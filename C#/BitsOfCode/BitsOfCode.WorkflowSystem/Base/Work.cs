@@ -22,22 +22,30 @@ namespace BitsOfCode.WorkflowSystem.Base
         public Task Do(CancellationToken? cancellationToken = null);
     }
 
-    // Don't use an interface
-    public interface INode
+    // Use a list instead of simple next,
+    // Use a method to get the next one 
+    // Create a RoutingNode that can get a method to choose which next you take
+    public class Node
     {
-        public INode? Previous { get; set; }
+        public Node? Previous { get; set; }
         public Lazy<IWork> Create { get; }
-        public INode? Next { get; }
+        public Lazy<Node?> Next { get; set; }
 
-        public INode Then(INode node)
+        public Node(Lazy<IWork> create)
+        {
+            Create = create;
+        }
+
+        public Lazy<Node?> Then(Lazy<Node?> node)
         {
             node.Previous = this;
+            Next = node;
             return node;
         }
     }
 
     // Should probably give up on having Work and Node in the same object (or find a way to make it Lazy )
-    public class Workflow<TContext> : IWork, INode
+    public class Workflow<TContext> : IWork
     {
         public INode? Previous { get; set; }
         public Func<IWork> Create => () => this;
@@ -57,6 +65,9 @@ namespace BitsOfCode.WorkflowSystem.Base
                 PreviousWork = ActualWork;
                 ActualWork = ActualWork.NextWork;
             }
+
+            Node nodes = new Node()
+                .Then(new Lazy<Node>()).Then();
         }
     }
 }
