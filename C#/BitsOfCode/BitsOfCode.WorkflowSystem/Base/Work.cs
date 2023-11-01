@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Xml.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace BitsOfCode.WorkflowSystem.Base
@@ -21,53 +22,77 @@ namespace BitsOfCode.WorkflowSystem.Base
     {
         public Task Do(CancellationToken? cancellationToken = null);
     }
-
-    // Use a list instead of simple next,
-    // Use a method to get the next one 
-    // Create a RoutingNode that can get a method to choose which next you take
-    public class Node
+    public interface IRoutingWork : IWork
     {
-        public Node? Previous { get; set; }
-        public Lazy<IWork> Create { get; }
-        public Lazy<Node?> Next { get; set; }
+        public Type NextWorkType { get; set; }
+    }
 
-        public Node(Lazy<IWork> create)
+
+    public interface IWorkflowNode
+    {
+        public Type GetWorkType();
+        public IWorkflowNode? Previous { get; set; }
+        public Lazy<IWork> Work { get; }
+        public IWorkflowNode? Next { get; set; }
+    }
+
+    public class WorkflowNode<TWork> : IWorkflowNode where TWork : IWork
+    {
+        public IWorkflowNode? Previous { get; set; }
+        public Lazy<IWork> Work { get; set; }
+        public virtual IWorkflowNode? Next { get; set; }
+
+        public WorkflowNode(Lazy<TWork> work)
         {
-            Create = create;
+            Work = new Lazy<IWork>(() => work.Value);
         }
 
-        public Lazy<Node?> Then(Lazy<Node?> node)
+        public IWorkflowNode Then(IWorkflowNode node)
         {
             node.Previous = this;
             Next = node;
             return node;
         }
+
+        public Type GetWorkType()
+        {
+            return typeof(TWork);
+        }
     }
 
-    // Should probably give up on having Work and Node in the same object (or find a way to make it Lazy )
-    public class Workflow<TContext> : IWork
+    public class WorkflowRoutingNode<TWork> : WorkflowNode<TWork> where TWork : IRoutingWork
     {
-        public INode? Previous { get; set; }
-        public Func<IWork> Create => () => this;
-        public INode? Next => throw new NotImplementedException();
+        public List<IWorkflowNode> Branches { get; set; } = new List<IWorkflowNode>();
 
-        public Workflow(IChainedWork work)
+        public override IWorkflowNode? Next
         {
-            ActualWork = work;
+            get
+            {
+                var nextType = ((IRoutingWork)Work.Value).NextWorkType;
+                return Branches.FirstOrDefault(x => x.GetWorkType() == nextType);
+            }
+            set {
+                throw new Exception("Can't set RoutingNode next Node.");
+            }
         }
+
+        public WorkflowRoutingNode(Lazy<TWork> work) : base(work)
+        { }
+    }
+
+
+    // Should probably give up on having Work and Node in the same object (or find a way to make it Lazy )
+    public class TreeWorkflow<TContext> : IWork
+    {
+        public IWorkflowNode? Node { get; set; }
 
         public async Task Do(CancellationToken? cancellationToken = null)
         {
-            while (ActualWork != null)
+            while (Node != null)
             {
-                ActualWork.PreviousWork = PreviousWork;
-                await ActualWork.Do(cancellationToken);
-                PreviousWork = ActualWork;
-                ActualWork = ActualWork.NextWork;
+                await Node.Work.Value.Do(cancellationToken);
+                Node = Node.Next;
             }
-
-            Node nodes = new Node()
-                .Then(new Lazy<Node>()).Then();
         }
     }
 }

@@ -23,7 +23,7 @@ namespace BitsOfCode.WorkflowSystem
 
     }
 
-    public class TestWorkflow : Workflow<GlobalContext>
+    public class TestWorkflow : TreeWorkflow<GlobalContext>
     {
         public TestWorkflow(IWorkUiContainer container) : base(new WorkA(container))
         {}
