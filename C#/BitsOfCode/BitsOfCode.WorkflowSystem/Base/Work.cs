@@ -13,13 +13,10 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace BitsOfCode.WorkflowSystem.Base
 {
-    // Linear workflow
-    // Chain workflow
-
-    // Access to previous work (for exemple if it have context)
-
     public interface IWork
     {
+        // Should cancel a task cancel the workflow or just go back ?
+        // Probably should separate the navigation from the cancel logic
         public Task Do(CancellationToken? cancellationToken = null);
     }
     public interface IRoutingWork : IWork
@@ -72,6 +69,7 @@ namespace BitsOfCode.WorkflowSystem.Base
                 return Branches.FirstOrDefault(x => x.GetWorkType() == nextType);
             }
             set {
+                // TODO : handle cancel and going back
                 throw new Exception("Can't set RoutingNode next Node.");
             }
         }
@@ -80,10 +78,9 @@ namespace BitsOfCode.WorkflowSystem.Base
         { }
     }
 
-
-    // Should probably give up on having Work and Node in the same object (or find a way to make it Lazy )
     public class TreeWorkflow<TContext> : IWork
     {
+        public TContext Context { get; set; }
         public IWorkflowNode? Node { get; set; }
 
         public async Task Do(CancellationToken? cancellationToken = null)
@@ -92,6 +89,23 @@ namespace BitsOfCode.WorkflowSystem.Base
             {
                 await Node.Work.Value.Do(cancellationToken);
                 Node = Node.Next;
+            }
+        }
+    }
+
+    public class LinearWorkflow<TContext> : IWork
+    {
+        public TContext Context { get; set; }
+        public List<Lazy<IWork>> Works { get; set; }
+
+        public async Task Do(CancellationToken? cancellationToken = null)
+        {
+            int currentIndex = 0;
+            while (currentIndex >= 0 && currentIndex < Works.Count)
+            {
+                // TODO : handle going back with cancel ?
+                await Works[currentIndex].Value.Do(cancellationToken);
+                currentIndex++;
             }
         }
     }
