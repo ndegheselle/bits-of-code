@@ -18,6 +18,7 @@ namespace BitsOfCode.WorkflowSystem.Base
         // Should cancel a task cancel the workflow or just go back ?
         // Probably should separate the navigation from the cancel logic
         public Task Do(CancellationToken? cancellationToken = null);
+        public bool GoBack { get; set; }
     }
     public interface IRoutingWork : IWork
     {
@@ -82,13 +83,17 @@ namespace BitsOfCode.WorkflowSystem.Base
     {
         public TContext Context { get; set; }
         public IWorkflowNode? Node { get; set; }
+        public bool GoBack { get; set; }
 
         public async Task Do(CancellationToken? cancellationToken = null)
         {
             while (Node != null)
             {
                 await Node.Work.Value.Do(cancellationToken);
-                Node = Node.Next;
+                if (Node.Work.Value.GoBack)
+                    Node = Node.Previous;
+                else
+                    Node = Node.Next;
             }
         }
     }
@@ -97,6 +102,7 @@ namespace BitsOfCode.WorkflowSystem.Base
     {
         public TContext Context { get; set; }
         public List<Lazy<IWork>> Works { get; set; }
+        public bool GoBack { get; set; }
 
         public async Task Do(CancellationToken? cancellationToken = null)
         {
@@ -105,7 +111,10 @@ namespace BitsOfCode.WorkflowSystem.Base
             {
                 // TODO : handle going back with cancel ?
                 await Works[currentIndex].Value.Do(cancellationToken);
-                currentIndex++;
+                if (Works[currentIndex].Value.GoBack)
+                    currentIndex--;
+                else
+                    currentIndex++;
             }
         }
     }
