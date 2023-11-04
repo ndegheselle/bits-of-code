@@ -1,4 +1,5 @@
 ﻿using BitsOfCode.WorkflowSystem.Base;
+using BitsOfCode.WorkflowSystem.Workflows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,18 +18,27 @@ using System.Windows.Shapes;
 namespace BitsOfCode.WorkflowSystem.Views
 {
     /// <summary>
-    /// Logique d'interaction pour A.xaml
+    /// Logique d'interaction pour HomeWork.xaml
     /// </summary>
-    public partial class WorkC : WorkUi
+    public partial class HomeWork : WorkUi, IRoutingWork
     {
-        public WorkC(IWorkUiContainer container) : base(container)
+        public Type NextWorkType { get; set; }
+
+        public HomeWork(IWorkUiContainer container) : base(container)
         {
             InitializeComponent();
         }
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
+        private void TreeWorkflow_Click(object sender, RoutedEventArgs e)
         {
-            GoBack();
+            NextWorkType = typeof(TestTreeWorkflow);
+            Finish();
+        }
+
+        private void LinearWorkflow_Click(object sender, RoutedEventArgs e)
+        {
+            NextWorkType = typeof(TestLinearWorkflow);
+            Finish();
         }
     }
 }

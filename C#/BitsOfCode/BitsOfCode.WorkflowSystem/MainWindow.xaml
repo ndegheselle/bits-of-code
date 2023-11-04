@@ -5,17 +5,24 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
     xmlns:local="clr-namespace:BitsOfCode.WorkflowSystem"
     mc:Ignorable="d"
     Title="MainWindow"
     Height="450"
     Width="800">
-    <Grid Margin="2">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
             <RowDefinition />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock>MainWindow text</TextBlock>
-        <ContentControl Grid.Row="1" x:Name="MainContainer" />
+        <ContentControl x:Name="MainContainer" />
+        <Border
+            Padding="2"
+            Grid.Row="1"
+            BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource {x:Static adonisUi:Brushes.Layer1BorderBrush}}">
+            <TextBlock x:Name="TextBlockStatut">Statut</TextBlock>
+        </Border>
     </Grid>
 </adonisControls:AdonisWindow>

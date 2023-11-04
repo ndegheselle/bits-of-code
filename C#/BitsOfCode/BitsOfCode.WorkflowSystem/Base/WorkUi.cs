@@ -14,10 +14,10 @@ namespace BitsOfCode.WorkflowSystem.Base
         public void Show(FrameworkElement element);
     }
 
-    public class WorkUi : UserControl, IChainedWork
+    public class WorkUi : UserControl, IWork
     {
         protected IWorkUiContainer Container { get; set; }
-        protected TaskCompletionSource TaskCompletion { get; set; }
+        protected TaskCompletionSource<bool> TaskCompletion { get; set; }
 
         public WorkUi(IWorkUiContainer container)
         {
@@ -26,38 +26,28 @@ namespace BitsOfCode.WorkflowSystem.Base
 
         protected void GoBack()
         {
-            NextWork = PreviousWork;
-            Finish();
+            TaskCompletion.TrySetResult(false);
         }
 
         protected void Finish()
         {
-            TaskCompletion.TrySetResult();
+            TaskCompletion.TrySetResult(true);
         }
 
         #region IWork
-        public IChainedWork? PreviousWork { get; set; }
-        public IChainedWork? NextWork { get; protected set; }
-        public async Task Do(CancellationToken? cancellationToken = null)
+        public Task<bool> Do(CancellationToken? cancellationToken = null)
         {
-            TaskCompletion = new TaskCompletionSource();
+            TaskCompletion = new TaskCompletionSource<bool>();
 
             // Handle CancellationToken through TaskCompletionSource
             if (cancellationToken != null)
                 cancellationToken?.Register(() =>
                 {
-                    NextWork = PreviousWork;
-                    TaskCompletion.TrySetCanceled();
+                    TaskCompletion.TrySetResult(false);
                 });
 
             Container.Show(this);
-            try
-            {
-                // Block until Finish() is called
-                await TaskCompletion.Task;
-            }
-            catch (TaskCanceledException)
-            {}
+            return TaskCompletion.Task;
         }
 
         #endregion

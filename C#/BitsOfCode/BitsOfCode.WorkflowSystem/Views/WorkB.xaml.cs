@@ -19,16 +19,32 @@ namespace BitsOfCode.WorkflowSystem.Views
     /// <summary>
     /// Logique d'interaction pour A.xaml
     /// </summary>
-    public partial class WorkB : WorkUi
+    public partial class WorkB : WorkUi, IWorkUiContainer
     {
         public WorkB(IWorkUiContainer container) : base(container)
         {
             InitializeComponent();
         }
 
+        public void Show(FrameworkElement element)
+        {
+            SubContainer.Content = element;
+        }
+
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
             GoBack();
+        }
+
+        private void NextButton_Click(object sender, RoutedEventArgs e)
+        {
+            Finish();
+        }
+
+        private void DoSub_Click(object sender, RoutedEventArgs e)
+        {
+            SubWork work = new SubWork(this);
+            work.Do();
         }
     }
 }

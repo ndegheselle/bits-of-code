@@ -6,24 +6,53 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:BitsOfCode.WorkflowSystem.Views"
     xmlns:base="clr-namespace:BitsOfCode.WorkflowSystem.Base"
+    xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
     mc:Ignorable="d"
     d:DesignHeight="450"
     d:DesignWidth="800">
-    <Grid>
+    <Grid Margin="2">
         <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        <TextBlock>This is B</TextBlock>
-        <Grid Grid.Row="1">
+        <GroupBox Grid.Row="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    FontWeight="Bold"
+                    FontSize="24"
+                    Foreground="{DynamicResource {x:Static adonisUi:Brushes.AccentBrush}}">
+                    Work B. This is different !
+                </TextBlock>
+                <ContentControl Grid.Column="1" x:Name="SubContainer">
+                    <Button
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"
+                        Click="DoSub_Click">
+                        Do sub
+                    </Button>
+                </ContentControl>
+            </Grid>
+
+        </GroupBox>
+        <Grid Grid.Row="3">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <Button x:Name="CancelButton" Click="CancelButton_Click">Cancel</Button>
+            <Button Grid.Column="2" Click="NextButton_Click">
+                Next
+            </Button>
         </Grid>
     </Grid>
 </base:WorkUi>

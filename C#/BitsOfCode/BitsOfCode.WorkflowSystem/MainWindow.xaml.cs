@@ -1,6 +1,7 @@
 ﻿using AdonisUI.Controls;
 using BitsOfCode.WorkflowSystem.Base;
 using BitsOfCode.WorkflowSystem.Views;
+using BitsOfCode.WorkflowSystem.Workflows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,17 +19,6 @@ using System.Windows.Shapes;
 
 namespace BitsOfCode.WorkflowSystem
 {
-    public class GlobalContext
-    {
-
-    }
-
-    public class TestWorkflow : TreeWorkflow<GlobalContext>
-    {
-        public TestWorkflow(IWorkUiContainer container) : base(new WorkA(container))
-        {}
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -37,13 +27,18 @@ namespace BitsOfCode.WorkflowSystem
         public MainWindow()
         {
             InitializeComponent();
-            TestWorkflow testWorkflow = new TestWorkflow(this);
+            MainWorkflow testWorkflow = new MainWorkflow(this, new GlobalContext());
             testWorkflow.Do();
         }
 
         public void Show(FrameworkElement element)
         {
             MainContainer.Content = element;
+        }
+
+        public void SetStatut(string statut)
+        {
+            TextBlockStatut.Text = statut;
         }
     }
 }

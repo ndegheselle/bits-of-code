@@ -15,16 +15,12 @@ namespace BitsOfCode.WorkflowSystem.Base
 {
     public interface IWork
     {
-        // Should cancel a task cancel the workflow or just go back ?
-        // Probably should separate the navigation from the cancel logic
-        public Task Do(CancellationToken? cancellationToken = null);
-        public bool GoBack { get; set; }
+        public Task<bool> Do(CancellationToken? cancellationToken = null);
     }
     public interface IRoutingWork : IWork
     {
         public Type NextWorkType { get; set; }
     }
-
 
     public interface IWorkflowNode
     {
@@ -32,6 +28,8 @@ namespace BitsOfCode.WorkflowSystem.Base
         public IWorkflowNode? Previous { get; set; }
         public Lazy<IWork> Work { get; }
         public IWorkflowNode? Next { get; set; }
+
+        public IWorkflowNode Then(IWorkflowNode node);
     }
 
     public class WorkflowNode<TWork> : IWorkflowNode where TWork : IWork
@@ -60,41 +58,50 @@ namespace BitsOfCode.WorkflowSystem.Base
 
     public class WorkflowRoutingNode<TWork> : WorkflowNode<TWork> where TWork : IRoutingWork
     {
-        public List<IWorkflowNode> Branches { get; set; } = new List<IWorkflowNode>();
+        public List<IWorkflowNode> Branches { get; set; }
 
+        private IWorkflowNode? _next;
         public override IWorkflowNode? Next
         {
             get
             {
+                if (_next != null) return _next;
                 var nextType = ((IRoutingWork)Work.Value).NextWorkType;
                 return Branches.FirstOrDefault(x => x.GetWorkType() == nextType);
             }
             set {
-                // TODO : handle cancel and going back
-                throw new Exception("Can't set RoutingNode next Node.");
+                _next = value;
             }
         }
 
-        public WorkflowRoutingNode(Lazy<TWork> work) : base(work)
-        { }
+        public WorkflowRoutingNode(Lazy<TWork> work, List<IWorkflowNode> branches) : base(work)
+        {
+            Branches = branches;
+            // XXX : maybe move this in the setter of Branches ?
+            foreach(var branch in Branches)
+                branch.Previous = this;
+        }
     }
 
     public class TreeWorkflow<TContext> : IWork
     {
         public TContext Context { get; set; }
-        public IWorkflowNode? Node { get; set; }
-        public bool GoBack { get; set; }
+        public IWorkflowNode RootNode { get; set; }
+        private IWorkflowNode? _actualNode { get; set; }
 
-        public async Task Do(CancellationToken? cancellationToken = null)
+        public async Task<bool> Do(CancellationToken? cancellationToken = null)
         {
-            while (Node != null)
+            bool result = true;
+            _actualNode = RootNode;
+            while (_actualNode != null)
             {
-                await Node.Work.Value.Do(cancellationToken);
-                if (Node.Work.Value.GoBack)
-                    Node = Node.Previous;
+                result = await _actualNode.Work.Value.Do(cancellationToken);
+                if (result)
+                    _actualNode = _actualNode.Next;
                 else
-                    Node = Node.Next;
+                    _actualNode = _actualNode.Previous;
             }
+            return result;
         }
     }
 
@@ -102,20 +109,20 @@ namespace BitsOfCode.WorkflowSystem.Base
     {
         public TContext Context { get; set; }
         public List<Lazy<IWork>> Works { get; set; }
-        public bool GoBack { get; set; }
 
-        public async Task Do(CancellationToken? cancellationToken = null)
+        public async Task<bool> Do(CancellationToken? cancellationToken = null)
         {
             int currentIndex = 0;
+            bool result = true;
             while (currentIndex >= 0 && currentIndex < Works.Count)
             {
-                // TODO : handle going back with cancel ?
-                await Works[currentIndex].Value.Do(cancellationToken);
-                if (Works[currentIndex].Value.GoBack)
-                    currentIndex--;
-                else
+                result = await Works[currentIndex].Value.Do(cancellationToken);
+                if (result)
                     currentIndex++;
+                else
+                    currentIndex--;
             }
+            return result;
         }
     }
 }

@@ -34,15 +34,8 @@ namespace BitsOfCode.WorkflowSystem.Views
             GoBack();
         }
 
-        private void NextBButton_Click(object sender, RoutedEventArgs e)
+        private void NextButton_Click(object sender, RoutedEventArgs e)
         {
-            NextWork = new WorkB(_container);
-            Finish();
-        }
-
-        private void NextCButton_Click(object sender, RoutedEventArgs e)
-        {
-            NextWork = new WorkC(_container);
             Finish();
         }
     }
