@@ -13,9 +13,10 @@
     let username = "";
 </script>
 
-<div class="columns is-centered mt-4">
+<div class="columns is-centered">
     <div class="column is-half">
         <div class="box">
+            <p>{username}</p>
             <div class="field">
                 <p class="label">Adress</p>
                 <div class="control">
@@ -23,6 +24,7 @@
                         class="input"
                         type="text"
                         placeholder="127.0.0.1:8080"
+                        bind:value={adress}
                     />
                 </div>
                 {#if $connection.status.error}
@@ -48,7 +50,7 @@
                         on:click={connect}>Connect</button
                     >
                 </div>
-                <div class="control">
+                <div class="control ml-2">
                     <button
                         class="button is-link is-light"
                         class:is-loading={$connection.status.pending}

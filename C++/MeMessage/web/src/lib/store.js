@@ -92,12 +92,12 @@ function createMessagesStore() {
         // Call C++ function to send message
         update(messages => {
             return [
-                ...messages,
                 {
                     content: message,
                     username: username,
                     date: new Date()
-                }
+                },
+                ...messages,
             ];
         });
     }

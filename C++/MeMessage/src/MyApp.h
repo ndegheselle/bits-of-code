@@ -43,8 +43,6 @@ public:
 
     virtual void OnChangeTitle(ultralight::View *caller,
                                const String &title) override;
-    virtual RefPtr<View> OnCreateInspectorView(ultralight::View* caller, bool is_local,
-        const String& inspected_url) override;
 protected:
     RefPtr<App> app_;
     RefPtr<Window> window_;
