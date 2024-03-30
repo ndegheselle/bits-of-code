@@ -6,21 +6,38 @@
 #include <JavaScriptCore/JSRetainPtr.h>
 #include <stdexcept>
 #include <format>
+#include <iostream>
 
 using namespace ultralight;
 namespace UI
 {
 	template <typename T>
-	JSValueRef convert(JSContextRef ctx, T value);
+	JSValueRef Convert(JSContextRef ctx, T value);
 
 	class JavascriptInterop
 	{
-	private:
-		RefPtr<View> _view;
 	protected:
-		JSValueRef execute(JSContextRef ctx, std::string functionName, std::vector<JSValueRef> args);
+		RefPtr<View> _view;
+		JSValueRef Execute(const JSContextRef &ctx, const std::string &functionName, const std::vector<JSValueRef> &args);
+
 	public:
 		JavascriptInterop(ultralight::View *view) : _view(view) {}
-		void notification(const std::string& message, const std::string& type);
+		virtual void RegisterCallbacks() = 0;
 	};
+
+	class UIHandler : public JavascriptInterop
+	{
+	public:
+		UIHandler(ultralight::View *view) : JavascriptInterop(view) {}
+		void RegisterCallbacks() override;
+
+#pragma region C++ -> JS Callbacks
+		void Notification(const std::string &message, const std::string &type);
+#pragma endregion
+#pragma region JS -> C++ Callbacks
+		JSValue Test(const JSObject& thisObject, const JSArgs& args);
+#pragma endregion
+	};
+
+
 }

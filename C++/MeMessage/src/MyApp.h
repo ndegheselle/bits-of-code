@@ -1,5 +1,6 @@
 #pragma once
 #include <AppCore/AppCore.h>
+#include "UI/JavascriptInterop.h"
 
 using namespace ultralight;
 
@@ -43,8 +44,11 @@ public:
 
     virtual void OnChangeTitle(ultralight::View *caller,
                                const String &title) override;
+
 protected:
     RefPtr<App> app_;
     RefPtr<Window> window_;
     RefPtr<Overlay> overlay_;
+
+    UI::UIHandler* uiHandler_;
 };

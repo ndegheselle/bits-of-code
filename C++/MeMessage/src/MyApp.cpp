@@ -17,10 +17,13 @@ MyApp::MyApp()
     window_->set_listener(this);
     overlay_->view()->set_load_listener(this);
     overlay_->view()->set_view_listener(this);
+
+    uiHandler_ = new UI::UIHandler(overlay_->view().get());
 }
 
 MyApp::~MyApp()
 {
+    delete uiHandler_;
 }
 
 void MyApp::Run()
@@ -54,6 +57,7 @@ void MyApp::OnDOMReady(ultralight::View *caller,
                        bool is_main_frame,
                        const String &url)
 {
+    uiHandler_->RegisterCallbacks();
 }
 
 void MyApp::OnChangeCursor(ultralight::View *caller,

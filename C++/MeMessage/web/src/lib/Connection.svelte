@@ -1,12 +1,14 @@
 <script>
     import { connection, notification } from "./store";
+    import cpp from "../cpp";
 
     function connect() {
         connection.connect(adress, username);
     }
 
     function host() {
-        connection.host(adress, username);
+        cpp.Test();
+        // connection.host(adress, username);
     }
 
     let adress = "test";
