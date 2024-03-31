@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <format>
 #include <iostream>
+#include <JavaScriptCore/JavaScript.h>
 
 using namespace ultralight;
 namespace UI

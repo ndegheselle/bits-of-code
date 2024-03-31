@@ -1,13 +1,14 @@
 <script>
     import { connection, notification } from "./store";
     import cpp from "../cpp";
+    import { onMount } from 'svelte';
 
     function connect() {
-        connection.connect(adress, username);
+        // connection.connect(adress, username);
     }
 
     function host() {
-        cpp.Test();
+        cpp.test();
         // connection.host(adress, username);
     }
 

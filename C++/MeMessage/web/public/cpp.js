@@ -1,2 +1,5 @@
-// For interop with c++
-window.Test = Test;
+// From C++ to JS
+function notification(message, type)
+{
+    window.store.notification.notify(message, type);
+}
