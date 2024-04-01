@@ -9,7 +9,7 @@
 #include <iostream>
 #include <JavaScriptCore/JavaScript.h>
 
-#include "../SocketHandler.h"
+#include "../SocketCommunication.h"
 
 using namespace ultralight;
 namespace UI
@@ -31,10 +31,10 @@ namespace UI
 	class UIHandler : public JavascriptInterop
 	{
 	private:
-		SocketHandler* _socketHandler;
+		ISocketCommunication* _socket = nullptr;
 
 	public:
-		UIHandler(ultralight::View *view, SocketHandler* socketHandler) : JavascriptInterop(view), _socketHandler(socketHandler) {}
+		UIHandler(ultralight::View *view) : JavascriptInterop(view) {}
 		void register_callbacks() override;
 #pragma region C++ -> JS Callbacks
 		void notification(const std::string &message, const std::string &type);

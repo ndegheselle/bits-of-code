@@ -84,25 +84,40 @@ namespace UI
 		ultralight::String address = args[0].ToString();
 		int port = args[1].ToInteger();
 
-		_socketHandler->server_connect(address.utf8().data(), port);
+		if (_socket)
+			delete _socket;
+
+		_socket = new SocketClient(address.utf8().data(), port);
+		_socket->on_recieving([this](const std::string& message) {
+			std::string username = message.substr(0, message.find(':'));
+			std::string content = message.substr(message.find(':') + 1);
+			received_message(username, content);
+		});
 
 		return JSValueMakeUndefined(thisObject.context());
 	}
 	JSValue UIHandler::host(const JSObject& thisObject, const JSArgs& args) {
 		int port = args[0].ToInteger();
 
-		_socketHandler->server_listen(port);
-		_socketHandler->set_message_callback([this](std::string message) {
-			// split message into username and message
-			std::string username = message.substr(0, message.find(":"));
-			std::string content = message.substr(message.find(":") + 2);
+		if (_socket)
+			delete _socket;
+
+		_socket = new SocketServer(port);
+		_socket->on_recieving([this](const std::string& message) {
+			std::string username = message.substr(0, message.find(':'));
+			std::string content = message.substr(message.find(':') + 1);
 			received_message(username, content);
 		});
-		_socketHandler->check_receiving();
 
 		return JSValueMakeUndefined(thisObject.context());
 	}
 	JSValue UIHandler::send_message(const JSObject& thisObject, const JSArgs& args) {
+		ultralight::String username = args[0].ToString();
+		ultralight::String message = args[1].ToString();
+
+		if (_socket)
+			_socket->send(username.utf8().data() + std::string(":") + message.utf8().data());
+
 		return JSValueMakeUndefined(thisObject.context());
 	}
 }

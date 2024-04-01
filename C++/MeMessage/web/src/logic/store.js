@@ -61,7 +61,7 @@ function createConnectionStore() {
                 }
             };
         });
-        cpp.connect(adress.split(":")[0], adress.split(":")[1]);
+        cpp.connect(adress.split(":")[0], adress.split(":")[1] || 8080);
     }
 
     function host(adress, username) {
@@ -77,7 +77,7 @@ function createConnectionStore() {
             };
         });
         notification.notify("Waiting for connection...", "info");
-        cpp.host(adress);
+        cpp.host(adress.split(":")[1] || 8080);
     }
 
     function connected(error) {
