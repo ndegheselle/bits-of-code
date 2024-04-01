@@ -1,6 +1,10 @@
 #pragma once
 #include <AppCore/AppCore.h>
 #include "UI/JavascriptInterop.h"
+#include "SocketHandler.h"
+
+#define WINDOW_WIDTH 600
+#define WINDOW_HEIGHT 400
 
 using namespace ultralight;
 
@@ -50,5 +54,6 @@ protected:
     RefPtr<Window> window_;
     RefPtr<Overlay> overlay_;
 
-    UI::UIHandler* uiHandler_;
+    UI::UIHandler *_uiHandler;
+    SocketHandler *_socketHandler;
 };

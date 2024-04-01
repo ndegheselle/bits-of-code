@@ -1,5 +1,5 @@
 <script>
-    import {notification} from "./store";
+    import {notification} from "../logic/store";
 </script>
 
 {#if $notification}
@@ -17,5 +17,9 @@
         left: 0;
         z-index: 1000;
         margin: 0.2rem;
+    }
+
+    .notification .delete {
+        right: 1rem;
     }
 </style>

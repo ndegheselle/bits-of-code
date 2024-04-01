@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import cpp from "./cpp";
 
 function createNotificationStore()
 {
@@ -49,7 +50,6 @@ function createConnectionStore() {
     });
 
     function connect(adress, username) {
-        // Call C++ function to connect to server
         update(connection => {
             return {
                 username: username,
@@ -61,18 +61,34 @@ function createConnectionStore() {
                 }
             };
         });
+        cpp.connect(adress.split(":")[0], adress.split(":")[1]);
     }
 
     function host(adress, username) {
-        // Call C++ function to host  to server
         update(connection => {
             return {
                 username: username,
                 adress: adress,
                 status: {
                     pending: true,
-                    success: true,
+                    success: false,
                     error: ""
+                }
+            };
+        });
+        notification.notify("Waiting for connection...", "info");
+        cpp.host(adress);
+    }
+
+    function connected(error) {
+        update(connection => {
+            return {
+                username: connection.username,
+                adress: connection.adress,
+                status: {
+                    pending: false,
+                    success: !error,
+                    error: error
                 }
             };
         });
@@ -81,15 +97,20 @@ function createConnectionStore() {
     return {
         subscribe,
         connect,
-        host
+        host,
+        connected
     };
 }
 
 function createMessagesStore() {
     const { set, update, subscribe } = writable([]);
 
-    function send(message, username) {
-        // Call C++ function to send message
+    function send(username, message) {
+        cpp.sendMessage(username, message);
+        received(username, message);
+    }
+
+    function received(username, message) {
         update(messages => {
             return [
                 {
@@ -104,7 +125,8 @@ function createMessagesStore() {
 
     return {
         subscribe,
-        send
+        send,
+        received
     };
 }
 

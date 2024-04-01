@@ -1,8 +1,5 @@
 #include "MyApp.h"
 
-#define WINDOW_WIDTH 600
-#define WINDOW_HEIGHT 400
-
 MyApp::MyApp()
 {
     app_ = App::Create();
@@ -18,12 +15,14 @@ MyApp::MyApp()
     overlay_->view()->set_load_listener(this);
     overlay_->view()->set_view_listener(this);
 
-    uiHandler_ = new UI::UIHandler(overlay_->view().get());
+    _socketHandler = new SocketHandler();
+    _uiHandler = new UI::UIHandler(overlay_->view().get(), _socketHandler);
 }
 
 MyApp::~MyApp()
 {
-    delete uiHandler_;
+    delete _socketHandler;
+    delete _uiHandler;
 }
 
 void MyApp::Run()
@@ -57,7 +56,7 @@ void MyApp::OnDOMReady(ultralight::View *caller,
                        bool is_main_frame,
                        const String &url)
 {
-    uiHandler_->RegisterCallbacks();
+    _uiHandler->register_callbacks();
 }
 
 void MyApp::OnChangeCursor(ultralight::View *caller,

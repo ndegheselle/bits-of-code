@@ -3,23 +3,23 @@
 namespace UI
 {
 	template <>
-	JSValueRef Convert(JSContextRef ctx, const std::string value)
+	JSValueRef convert(JSContextRef ctx, const std::string value)
 	{
 		JSRetainPtr<JSStringRef> str = adopt(JSStringCreateWithUTF8CString(value.c_str()));
 		return JSValueMakeString(ctx, str.get());
 	}
 	template <>
-	JSValueRef Convert(JSContextRef ctx, double value)
+	JSValueRef convert(JSContextRef ctx, double value)
 	{
 		return JSValueMakeNumber(ctx, value);
 	}
 	template <>
-	JSValueRef Convert(JSContextRef ctx, bool value)
+	JSValueRef convert(JSContextRef ctx, bool value)
 	{
 		return JSValueMakeBoolean(ctx, value);
 	}
 
-	JSValueRef JavascriptInterop::Execute(const JSContextRef &ctx, const std::string &functionName, const std::vector<JSValueRef> &args)
+	JSValueRef JavascriptInterop::execute(const JSContextRef &ctx, const std::string &functionName, const std::vector<JSValueRef> &args)
 	{
 		JSObject global = JSGlobalObject();
 		JSValueRef exception = nullptr;
@@ -53,24 +53,56 @@ namespace UI
 		return result;
 	}
 
-	void UIHandler::RegisterCallbacks()
+	void UIHandler::register_callbacks()
 	{
 		RefPtr<JSContext> context = _view->LockJSContext();
 		SetJSContext(context->ctx());
 		JSObject global = JSGlobalObject();
 
-		global["Test"] = BindJSCallbackWithRetval(&UIHandler::Test);
+		global["connect"] = BindJSCallbackWithRetval(&UIHandler::connect);
+		global["host"] = BindJSCallbackWithRetval(&UIHandler::host);
+		global["sendMessage"] = BindJSCallbackWithRetval(&UIHandler::send_message);
 	}
 
-	void UIHandler::Notification(const std::string &message, const std::string &type)
+	void UIHandler::notification(const std::string &message, const std::string &type)
 	{
 		JSContextRef ctx = (*_view->LockJSContext());
-		Execute(ctx, "notification", {Convert<std::string>(ctx, message), Convert<std::string>(ctx, type)});
+		execute(ctx, "notification", {convert<std::string>(ctx, message), convert<std::string>(ctx, type)});
 	}
 
-	JSValue UIHandler::Test(const JSObject &thisObject, const JSArgs &args)
-	{
-		Notification("Hello from C++!", "is-info");
-		return JSValue("Hello from C++!<br/>Ultralight rocks!");
+	void UIHandler::connected(const std::string &error) {
+		JSContextRef ctx = (*_view->LockJSContext());
+		execute(ctx, "connected", {convert<std::string>(ctx, error)});
+	}
+
+	void UIHandler::received_message(const std::string &username, const std::string &message) {
+		JSContextRef ctx = (*_view->LockJSContext());
+		execute(ctx, "receivedMessage", {convert<std::string>(ctx, username), convert<std::string>(ctx, message)});
+	}
+
+	JSValue UIHandler::connect(const JSObject& thisObject, const JSArgs& args) {
+		ultralight::String address = args[0].ToString();
+		int port = args[1].ToInteger();
+
+		_socketHandler->server_connect(address.utf8().data(), port);
+
+		return JSValueMakeUndefined(thisObject.context());
+	}
+	JSValue UIHandler::host(const JSObject& thisObject, const JSArgs& args) {
+		int port = args[0].ToInteger();
+
+		_socketHandler->server_listen(port);
+		_socketHandler->set_message_callback([this](std::string message) {
+			// split message into username and message
+			std::string username = message.substr(0, message.find(":"));
+			std::string content = message.substr(message.find(":") + 2);
+			received_message(username, content);
+		});
+		_socketHandler->check_receiving();
+
+		return JSValueMakeUndefined(thisObject.context());
+	}
+	JSValue UIHandler::send_message(const JSObject& thisObject, const JSArgs& args) {
+		return JSValueMakeUndefined(thisObject.context());
 	}
 }

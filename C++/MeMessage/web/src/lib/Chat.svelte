@@ -1,5 +1,5 @@
 <script>
-    import { messages, connection } from "./store.js";
+    import { messages, connection } from "../logic/store.js";
 
     function formatDate(date) {
         var hours = date.getHours();
@@ -22,7 +22,8 @@
     }
 
     function handleKeyDown(event) {
-        if (event.key === "Enter") {
+        // Ctrl + Enter
+        if (event.ctrlKey && event.key === "Enter") {
             send();
         }
     }
@@ -33,7 +34,7 @@
 
     function send() {
         if (!messageContent) return;
-        messages.send(messageContent, $connection.username);
+        messages.send($connection.username, messageContent);
         messageContent = "";
     }
 
@@ -95,7 +96,7 @@
     .chat-message .body {
         display: inline-block;
         padding: 0.4rem 0.8rem;
-        border-radius: 0.6rem;
+        border-radius: 0.6rem 0.6rem 0.6rem 0;
     }
     .chat-message .content {
         padding-left: 0.4rem;
@@ -103,5 +104,9 @@
 
     .chat-message.is-autor {
         text-align: right;
+    }
+
+    .chat-message.is-autor .body  {
+        border-radius: 0.6rem 0.6rem 0 0.6rem;
     }
 </style>

@@ -4,7 +4,14 @@
   import Connection from "./lib/Connection.svelte";
   import Chat from "./lib/Chat.svelte";
 
-  import {notification, connection} from "./lib/store.js";
+  import { init } from "./logic/globals.js";
+  import { connection } from "./logic/store.js";
+  import { onMount } from "svelte";
+
+  
+  onMount(() => {
+    init();
+  });
 </script>
 
 <Notification />
