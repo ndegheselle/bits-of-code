@@ -4,8 +4,8 @@ cmake_minimum_required(VERSION 3.3.2)
 include(cmake/App.cmake)
 
 set (CMAKE_CXX_STANDARD 20)
-set(SOURCES "src/SocketCommunication.h"
-            "src/SocketCommunication.cpp"
+set(SOURCES "src/logic/SocketCommunication.h"
+            "src/logic/SocketCommunication.cpp"
             "src/UI/JavascriptInterop.h"
             "src/UI/JavascriptInterop.cpp"
             "src/MyApp.h"

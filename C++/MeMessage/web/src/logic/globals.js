@@ -10,10 +10,10 @@ export function init() {
     globalThis.connected = function(error)
     {
         if (error)
-            notification.notify("Error during the connection : " + error, "is-danger");
+            notification.notify("Error during the connection.", "is-danger");
         else
             notification.notify("Connection successfull.", "is-success");
-            connection.connected(error);
+        connection.connected(error);
     }
 
     globalThis.receivedMessage = function(username, message)

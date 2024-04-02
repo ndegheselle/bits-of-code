@@ -61,7 +61,7 @@ namespace UI
 
 		global["connect"] = BindJSCallbackWithRetval(&UIHandler::connect);
 		global["host"] = BindJSCallbackWithRetval(&UIHandler::host);
-		global["sendMessage"] = BindJSCallbackWithRetval(&UIHandler::send_message);
+		global["send_message"] = BindJSCallbackWithRetval(&UIHandler::send_message);
 	}
 
 	void UIHandler::notification(const std::string &message, const std::string &type)
@@ -77,7 +77,7 @@ namespace UI
 
 	void UIHandler::received_message(const std::string &username, const std::string &message) {
 		JSContextRef ctx = (*_view->LockJSContext());
-		execute(ctx, "receivedMessage", {convert<std::string>(ctx, username), convert<std::string>(ctx, message)});
+		execute(ctx, "receivedMessage", { convert<std::string>(ctx, username), convert<std::string>(ctx, message) });
 	}
 
 	JSValue UIHandler::connect(const JSObject& thisObject, const JSArgs& args) {
@@ -87,12 +87,20 @@ namespace UI
 		if (_socket)
 			delete _socket;
 
-		_socket = new SocketClient(address.utf8().data(), port);
-		_socket->on_recieving([this](const std::string& message) {
-			std::string username = message.substr(0, message.find(':'));
-			std::string content = message.substr(message.find(':') + 1);
-			received_message(username, content);
-		});
+		std::string error = "";
+		try {
+			_socket = new logic::SocketClient(address.utf8().data(), port);
+			_socket->on_recieving([this](const std::string& message) {
+				std::string username = message.substr(0, message.find(':'));
+				std::string content = message.substr(message.find(':') + 1);
+				_messageQueue.enqueue(logic::Message{ username, content });
+			});
+		}
+		catch (const std::exception& e) {
+			error = "Can't connect to server.";
+		}
+
+		connected(error);
 
 		return JSValueMakeUndefined(thisObject.context());
 	}
@@ -102,12 +110,19 @@ namespace UI
 		if (_socket)
 			delete _socket;
 
-		_socket = new SocketServer(port);
-		_socket->on_recieving([this](const std::string& message) {
-			std::string username = message.substr(0, message.find(':'));
-			std::string content = message.substr(message.find(':') + 1);
-			received_message(username, content);
-		});
+		std::string error = "";
+		try {
+			_socket = new logic::SocketServer(port);
+			_socket->on_recieving([this](const std::string& message) {
+				std::string username = message.substr(0, message.find(':'));
+				std::string content = message.substr(message.find(':') + 1);
+				_messageQueue.enqueue(logic::Message{ username, content });
+			});
+		}
+		catch (const std::exception& e) {
+			error = "Can't host server.";
+		}
+		connected(error);
 
 		return JSValueMakeUndefined(thisObject.context());
 	}
@@ -116,7 +131,7 @@ namespace UI
 		ultralight::String message = args[1].ToString();
 
 		if (_socket)
-			_socket->send(username.utf8().data() + std::string(":") + message.utf8().data());
+			_socket->send_message(username.utf8().data() + std::string(":") + message.utf8().data());
 
 		return JSValueMakeUndefined(thisObject.context());
 	}

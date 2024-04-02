@@ -1,7 +1,7 @@
 #pragma once
 #include <AppCore/AppCore.h>
 #include "UI/JavascriptInterop.h"
-#include "SocketHandler.h"
+#include "logic/SafeQueue.h"
 
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 400
@@ -55,5 +55,5 @@ protected:
     RefPtr<Overlay> overlay_;
 
     UI::UIHandler *_uiHandler;
-    SocketHandler *_socketHandler;
+    logic::SafeQueue<logic::Message> _messageQueue;
 };

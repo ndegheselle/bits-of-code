@@ -4,12 +4,13 @@
 #include <AppCore/AppCore.h>
 #include <vector>
 #include <JavaScriptCore/JSRetainPtr.h>
-#include <stdexcept>
+#include <exception>
 #include <format>
 #include <iostream>
 #include <JavaScriptCore/JavaScript.h>
 
-#include "../SocketCommunication.h"
+#include "../logic/SocketCommunication.h"
+#include "../logic/SafeQueue.h"
 
 using namespace ultralight;
 namespace UI
@@ -31,10 +32,11 @@ namespace UI
 	class UIHandler : public JavascriptInterop
 	{
 	private:
-		ISocketCommunication* _socket = nullptr;
+		logic::SocketCommunication* _socket = nullptr;
+		logic::SafeQueue<logic::Message>& _messageQueue;
 
 	public:
-		UIHandler(ultralight::View *view) : JavascriptInterop(view) {}
+		UIHandler(ultralight::View *view, logic::SafeQueue<logic::Message>& messageQueue) : JavascriptInterop(view), _messageQueue(messageQueue){}
 		void register_callbacks() override;
 #pragma region C++ -> JS Callbacks
 		void notification(const std::string &message, const std::string &type);

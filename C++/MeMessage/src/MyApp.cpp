@@ -15,13 +15,11 @@ MyApp::MyApp()
     overlay_->view()->set_load_listener(this);
     overlay_->view()->set_view_listener(this);
 
-    _socketHandler = new SocketHandler();
-    _uiHandler = new UI::UIHandler(overlay_->view().get(), _socketHandler);
+    _uiHandler = new UI::UIHandler(overlay_->view().get(), _messageQueue);
 }
 
 MyApp::~MyApp()
 {
-    delete _socketHandler;
     delete _uiHandler;
 }
 
@@ -32,6 +30,11 @@ void MyApp::Run()
 
 void MyApp::OnUpdate()
 {
+    if (!_messageQueue.empty())
+    {
+        auto message = _messageQueue.dequeue();
+        _uiHandler->received_message(message.username, message.content);
+    }
 }
 
 void MyApp::OnClose(ultralight::Window *window)

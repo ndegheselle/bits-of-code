@@ -76,7 +76,6 @@ function createConnectionStore() {
                 }
             };
         });
-        notification.notify("Waiting for connection...", "info");
         cpp.host(adress.split(":")[1] || 8080);
     }
 
