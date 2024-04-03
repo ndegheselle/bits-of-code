@@ -3,8 +3,8 @@
 #include "UI/JavascriptInterop.h"
 #include "logic/SafeQueue.h"
 
-#define WINDOW_WIDTH 600
-#define WINDOW_HEIGHT 400
+#define WINDOW_WIDTH 350
+#define WINDOW_HEIGHT 600
 
 using namespace ultralight;
 
