@@ -1,9 +1,0 @@
-html {
-    overflow-y: auto !important;
-}
-
-html,body, #app, main {
-    height: 100%;
-	margin: 0;
-    box-sizing: border-box;
-}
